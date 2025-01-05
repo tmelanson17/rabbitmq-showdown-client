@@ -1,0 +1,15 @@
+{
+  "name": "rabbitmq-showdown-client",
+  "version": "1.0.0",
+  "description": "JS application which spins up a PS battlestream and listens for commands via RabbitMQ",
+  "main": "index.js",
+  "scripts": {
+    "main": "node index.js"
+  },
+  "author": "TJ Melanson",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.5",
+    "pokemon-showdown": "^0.11.9"
+  }
+}
