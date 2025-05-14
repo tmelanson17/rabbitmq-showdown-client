@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 
+// @argument --stream <id> The ID of this battle stream. Used for running multiple battles in parallel.
+const streamArgIndex = process.argv.indexOf('--stream');
+if (streamArgIndex === -1 || streamArgIndex + 1 >= process.argv.length) {
+    console.error('Error: --stream argument is required.');
+    process.exit(1);
+}
+const queueIndex = process.argv[streamArgIndex + 1];
+
 const Sim = require('pokemon-showdown');
 var amqp = require('amqplib/callback_api');
 
@@ -83,6 +91,7 @@ writer = function (channel, queue) {
     }, {
         noAck: true
     });
+
 }
 
 connector = function (queue) {
@@ -95,17 +104,21 @@ connector = function (queue) {
                 throw error1;
             }
 
-            writer(channel, queue);
+            var queueName = `${queue}-battle-${queueIndex}`;
+            writer(channel, queueName);
         });
     });
 }
 
+// TODO: Generate the queue so that multiple streams are in parallel.
 stream.write(`>start {"formatid":"gen8randombattle"}`);
 Object.entries(PlayerNames).forEach(([side, player]) => {
     stream.write(`>player ${side} {"name":"${player}"}`);
     connector(QueuesFromPlayer[side]);
 });
+console.log("Connected to RabbitMQ");
 amqp.connect('amqp://localhost', function (error0, connection) {
+    console.log("Connected stream reader");
     if (error0) {
         throw error0;
     }
